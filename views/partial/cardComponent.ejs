@@ -1,6 +1,30 @@
           <div class="col-lg-4 mb-2">
             <div class="card mb-4">
-              <a href="#!"><img class="card-img-top" src="https://dummyimage.com/700x350/dee2e6/6c757d.jpg" alt="..." /></a>
+              <% if (item.image.length > 0) { %>
+              <div id="carousel<%= item.uuid %>" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner" style="width:100%; height: 500px !important;">
+                  <% item.image.forEach((image, index) => { %>
+                  <div class="carousel-item <%= index == 0 ? 'active': '' %>">
+                    <img src="<%= image.file_url %>" class="d-block h-50 w-100" alt="<%= image.file_name %>">
+                  </div>
+                  <% }) %>
+
+                </div>
+
+                <button class="carousel-control-prev" type="button" data-bs-target="#carousel<%= item.uuid %> " data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carousel<%= item.uuid %> " data-bs-slide="next">
+                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Next</span>
+                </button>
+              </div>
+              <% } else { %>
+              <a href="#!"><img class="card-img-top" style=" width:100%; height: 500px !important;" src="https://dummyimage.com/3071x5460/dee1e6/76797e.jpg&text=NO+IMAGE" alt="..." /></a>
+
+              <% } %>
+
               <div class="card-body">
                 <div class="small text-muted"><%= new Date(item.release_date).toLocaleDateString('id-ID') %> </div>
                 <h2 class="card-title h4"><%= item.title %> </h2>

@@ -3,40 +3,44 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Book extends Model {
+  class File extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
-      Book.hasMany(models.File, {
+      File.belongsTo(models.Book, {
         foreignKey: 'owner_uuid',
-        as: 'image'
+        as: 'book'
       })
+      // define association here
     }
   }
-  Book.init({
+  File.init({
     uuid: {
       type: DataTypes.UUID,
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4
     },
-    author_name: {
+    file_url: {
       type: DataTypes.STRING(255),
       allowNull: false
     },
-    title: {
+    file_name: {
       type: DataTypes.STRING(255),
       allowNull: false
     },
-    description: {
-      type: DataTypes.TEXT,
+    file_size: {
+      type: DataTypes.STRING(255),
       allowNull: false
     },
-    release_date: {
-      type: DataTypes.DATE,
+    original_filename: {
+      type: DataTypes.STRING(255),
+      allowNull: false
+    },
+    owner_uuid: {
+      type: DataTypes.STRING(255),
       allowNull: false
     },
     createdAt: {
@@ -44,8 +48,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'Book',
+    modelName: 'File',
     createdAt: true
   });
-  return Book;
+  return File;
 };
