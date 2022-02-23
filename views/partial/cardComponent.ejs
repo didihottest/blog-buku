@@ -1,0 +1,25 @@
+          <div class="col-lg-4 mb-2">
+            <div class="card mb-4">
+              <a href="#!"><img class="card-img-top" src="https://dummyimage.com/700x350/dee2e6/6c757d.jpg" alt="..." /></a>
+              <div class="card-body">
+                <div class="small text-muted"><%= new Date(item.release_date).toLocaleDateString('id-ID') %> </div>
+                <h2 class="card-title h4"><%= item.title %> </h2>
+                <p class="card-text"><%= item.description%> </p>
+
+                <div class="btn-group" role="group" aria-label="Basic example">
+                  <button type="button" class="btn btn-primary">
+                    <a class="text-light text-decoration-none" href=" /detail/<%= item.uuid %>">Read more</a>
+                  </button>
+                  <button type=" button" class="btn btn-warning">
+                    <a class="text-light text-decoration-none" href=" /edit/<%= item.uuid %>">Edit</a>
+                  </button>
+                  <form action="/delete/<%= item.uuid %>" method="post">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                  </form>
+                </div>
+              </div>
+              <div class="card-footer">
+                <p>Ditulis Oleh : <%= item.author_name %> </p>
+              </div>
+            </div>
+          </div>
