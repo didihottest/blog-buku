@@ -41,11 +41,16 @@ module.exports = (sequelize, DataTypes) => {
     },
     createdAt: {
       type: DataTypes.DATE
+    },
+    updatedAt: {
+      type: DataTypes.DATE
     }
   }, {
     sequelize,
     modelName: 'Book',
-    createdAt: true
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    freezeTableName: true
   });
   return Book;
 };

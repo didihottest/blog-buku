@@ -5,3 +5,13 @@
 */
 // This file is intentionally blank
 // Use this file to add JavaScript to your project
+
+// function front end untuk hapus pencarian
+const clearInput = () => {
+  const input = document.querySelectorAll("input");
+  for (const item of input) {
+    if (item.name !== "page") {
+      item.value = null
+    }
+  }
+}

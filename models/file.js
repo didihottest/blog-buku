@@ -40,16 +40,21 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     owner_uuid: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.UUID,
       allowNull: false
     },
     createdAt: {
+      type: DataTypes.DATE
+    },
+    updatedAt: {
       type: DataTypes.DATE
     }
   }, {
     sequelize,
     modelName: 'File',
-    createdAt: true
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    freezeTableName: true
   });
   return File;
 };

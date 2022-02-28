@@ -1,14 +1,74 @@
 const { Book, File } = require('../models')
+const { Op } = require('sequelize')
 const fs = require('fs')
 
 // controller untuk halaman home page
 const Home = async (req, res) => {
-  const daftarBuku = await Book.findAll({
-    include: ['image']
+  const { success, error } = req.flash()
+  console.log('====================================');
+  console.log(success);
+  console.log(error);
+  console.log('====================================');
+  const page = Number(req.query.page) || 1
+  const { author_name, title, description, release_date_from, release_date_to } = req.query
+  const itemPerPage = 6
+
+  const where = {}
+  // hanya cari authorname ketika user input authorname nya di search bar
+  // pencarian ilike adalah pencarian yang case insensitive
+  if (author_name) {
+    where['author_name'] = { [Op.iLike]: `%${author_name}%` }
+  }
+
+  if (title) {
+    where['title'] = { [Op.iLike]: `%${title}%` }
+  }
+
+  if (description) {
+    where['description'] = { [Op.iLike]: `%${description}%` }
+  }
+
+  // if (release_date) {
+  //   where['release_date'] = release_date
+  // }
+
+
+  // antara tanggal
+  if (release_date_from && release_date_to) {
+    where['release_date'] = { [Op.between]: [release_date_from, release_date_to] }
+  } else if (release_date_from) {
+    // tanggal lebih dari
+    where['release_date'] = { [Op.gte]: release_date_from }
+    // tanggal kurang dari
+  } else if (release_date_to) {
+    where['release_date'] = { [Op.lte]: release_date_to }
+
+  }
+
+
+  const daftarBuku = await Book.findAndCountAll({
+    distinct: true,
+    // subQuery: false,
+    where: where,
+    include: ['image'],
+    order: [['createdAt', 'DESC']],
+    offset: (page - 1) * itemPerPage,
+    limit: itemPerPage,
+    // skip 6 data pertama karena pagination
+    // halaman(2) - 1 * jumlah yang ditampilkan (6) = 6
+    // halaman(3) - 1 * jumlah yang ditampilkan (6) = 6
   })
-  // console.log(daftarBuku);
+  // console.log(daftarBuku)
+
   res.render('home', {
-    data: daftarBuku
+    data: daftarBuku.rows,
+    currentPage: page,
+    totalPage: Math.ceil(daftarBuku.count / itemPerPage),
+    nextPage: page + 1,
+    previousPage: (page - 1) == 0 ? 1 : (page - 1),
+    query: req.query,
+    success: success,
+    error: error
   })
 }
 
@@ -62,7 +122,7 @@ const CreateBookFunction = async (req, res,) => {
     author_name,
     title,
     description,
-    release_date
+    // release_date
   }).then(async (data) => {
     // jika user upload foto
     if (req.files.length > 0) {
@@ -77,8 +137,14 @@ const CreateBookFunction = async (req, res,) => {
         })
       }
     }
+    // berikan pesan success kepada route / atau route home ketika pembuatan buku berhasil
+    // req.flash hanya akan bisa dibaca data nya kalau ada res.redirect
+    // tentukan flash message sebelum proses redirect dilakukan
+    req.flash('success', 'New Book Created')
     res.redirect('/')
   }).catch((error) => {
+    // berikan pesan error kepada route / atau route home ketika pembuatan buku gagal
+    req.flash('error', error.message)
     console.log('====================================');
     console.log(error);
     console.log('====================================');
@@ -121,18 +187,29 @@ const Singlebook = async (req, res) => {
 }
 
 // untuk render halaman edit buku
-const EditBook = async (req, res) => {
+const EditBook = async (req, res, next) => {
+  try {
+    const singleBook = await Book.findOne({
+      where: {
+        uuid: req.params.id
+      }
+    })
 
-  const singleBook = await Book.findOne({
-    where: {
-      uuid: req.params.id
+    // jika buku dengan uuid yang dimasukin dari params browser nya ada
+    // render halaman buku
+    if (singleBook) {
+      res.render('editBook', {
+        data: singleBook
+      })
+    } else {
+      next()
     }
-  })
+  } catch (error) {
+    next()
+  }
 
 
-  res.render('editBook', {
-    data: singleBook
-  })
+
 }
 
 
@@ -186,9 +263,12 @@ const EditBookFunction = async (req, res,) => {
     })
 
     if (bookUpdated) {
+      req.flash('success', 'Book Edited Successfully')
       res.redirect('/')
     }
   } catch (error) {
+    req.flash('error', error.message)
+
     console.log('====================================');
     console.log(error);
     console.log('====================================');
@@ -221,9 +301,11 @@ const DeleteBookFunction = async (req, res,) => {
     await bookToDelete.destroy()
 
     if (bookToDelete) {
+      req.flash('success', 'Book Deleted Successfully')
       res.redirect('/')
     }
   } catch (error) {
+    req.flash('error', error.message)
     console.log('====================================');
     console.log(error);
     console.log('====================================');
