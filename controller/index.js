@@ -125,7 +125,7 @@ const CreateBookFunction = async (req, res,) => {
     author_name,
     title,
     description,
-    // release_date
+    release_date
   }).then(async (data) => {
     // jika user upload foto
     if (req.files.length > 0) {
