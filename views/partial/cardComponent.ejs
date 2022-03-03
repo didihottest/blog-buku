@@ -34,12 +34,17 @@
                   <button type="button" class="btn btn-primary">
                     <a class="text-light text-decoration-none" href=" /detail/<%= item.uuid %>">Read more</a>
                   </button>
+
+                  <!-- kalau login perbolehkan untuk edit dan delete -->
+                  <% if (username) { %>
                   <button type=" button" class="btn btn-warning">
                     <a class="text-light text-decoration-none" href=" /edit/<%= item.uuid %>">Edit</a>
                   </button>
                   <form action="/delete/<%= item.uuid %>" method="post">
                     <button type="submit" class="btn btn-danger">Delete</button>
                   </form>
+                  <% } %>
+
                 </div>
               </div>
               <div class="card-footer">

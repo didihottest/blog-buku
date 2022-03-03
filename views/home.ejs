@@ -7,7 +7,8 @@
 
 <body>
   <!-- Responsive navbar-->
-  <%- include('partial/navbar')  %>
+  <!-- passing data username ke navbar -->
+  <%- include('partial/navbar', {username: username})  %>
   <!-- Page header with logo and tagline-->
   <header class="py-5 bg-light border-bottom mb-4">
     <div class="container">
@@ -78,7 +79,7 @@
         <div class="row">
           <!-- Blog post-->
           <% data.forEach(item => { %>
-          <%- include('partial/cardComponent', {item: item})  %>
+          <%- include('partial/cardComponent', {item: item, username: username})  %>
           <% }) %>
           <!-- Pagination-->
           <nav aria-label="Pagination">

@@ -1,14 +1,12 @@
-const { Book, File } = require('../models')
+const { Book, File, User } = require('../models')
 const { Op } = require('sequelize')
 const fs = require('fs')
+const bcrypt = require('bcrypt')
 
 // controller untuk halaman home page
 const Home = async (req, res) => {
+
   const { success, error } = req.flash()
-  console.log('====================================');
-  console.log(success);
-  console.log(error);
-  console.log('====================================');
   const page = Number(req.query.page) || 1
   const { author_name, title, description, release_date_from, release_date_to } = req.query
   const itemPerPage = 6
@@ -58,7 +56,7 @@ const Home = async (req, res) => {
     // halaman(2) - 1 * jumlah yang ditampilkan (6) = 6
     // halaman(3) - 1 * jumlah yang ditampilkan (6) = 6
   })
-  // console.log(daftarBuku)
+  console.log(req.user)
 
   res.render('home', {
     data: daftarBuku.rows,
@@ -68,13 +66,18 @@ const Home = async (req, res) => {
     previousPage: (page - 1) == 0 ? 1 : (page - 1),
     query: req.query,
     success: success,
-    error: error
+    error: error,
+    // req.user akan otomatis ada data user yang login jika user nya sudah login
+    // kalau belum req.user nilainya null
+    username: req.user ? req.user.name : null
   })
 }
 
 // untuk render halaman create buku baru
 const CreateBook = (req, res) => {
-  res.render('createBook')
+  res.render('createBook', {
+    username: req.user ? req.user.name : null
+  })
 }
 
 // untuk create new book
@@ -173,7 +176,7 @@ const CreateBookFunction = async (req, res,) => {
 
 // untuk render halaman detail buku
 const Singlebook = async (req, res) => {
-
+  const user = req.user
   const singleBook = await Book.findOne({
     where: {
       uuid: req.params.id
@@ -182,7 +185,8 @@ const Singlebook = async (req, res) => {
 
 
   res.render('singleBook', {
-    data: singleBook
+    data: singleBook,
+    username: req.user ? req.user.name : null
   })
 }
 
@@ -199,7 +203,9 @@ const EditBook = async (req, res, next) => {
     // render halaman buku
     if (singleBook) {
       res.render('editBook', {
-        data: singleBook
+        data: singleBook,
+        username: req.user ? req.user.name : null
+
       })
     } else {
       next()
@@ -313,8 +319,65 @@ const DeleteBookFunction = async (req, res,) => {
   }
 }
 
+// render halaman registrasi
 
+const Register = (req, res, next) => {
+  const { success, error } = req.flash()
+  res.render('register', {
+    success,
+    error
+  })
+}
 
+const RegisterFunction = async (req, res, next) => {
+  try {
+    // check apakah password dan confirm passwordnya sama
+    if (req.body.password1 !== req.body.password2) {
+      req.flash('error', 'Password yang anda masukkan tidak cocok')
+      res.redirect('/register')
+    } else {
+      // create new user
+      const hashedPassword = await bcrypt.hash(req.body.password1, 10)
+      await User.create({
+        name: req.body.name,
+        email: req.body.email,
+        password: hashedPassword
+      })
+      req.flash('success', 'User Registered Successfully')
+      res.redirect('/login')
+    }
+  } catch (error) {
+    req.flash('error', error.message)
+    console.log('====================================');
+    console.log(error);
+    console.log('====================================');
+    res.redirect('/register')
+  }
+
+}
+
+const Login = (req, res, next) => {
+  try {
+    const { success, error } = req.flash()
+    res.render('login', {
+      success,
+      error
+    })
+  } catch (error) {
+    req.flash('error', error.message)
+    console.log('====================================');
+    console.log(error);
+    console.log('====================================');
+    res.redirect('/')
+  }
+
+}
+
+// untuk logout
+const Logout = (req, res, next) => {
+  req.logOut()
+  res.redirect('/login')
+}
 module.exports = {
   Home,
   CreateBook,
@@ -322,5 +385,9 @@ module.exports = {
   Singlebook,
   EditBook,
   EditBookFunction,
-  DeleteBookFunction
+  DeleteBookFunction,
+  Register,
+  RegisterFunction,
+  Login,
+  Logout
 }
